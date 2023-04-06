@@ -1,10 +1,32 @@
 import 'package:geolocator/geolocator.dart';
 
+class Location {
+  double? _latitude;
+  double? _longitude;
+
+  //Getters:
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
+
+  //Methods:
+  Future<void> getCurrentLocation() async {
+    Position? position;
+
+    try {
+      position = await _determinePosition();
+      _latitude = position.latitude;
+      _longitude = position.longitude;
+    } catch (e) {
+      print(e);
+    }
+  }
+}
+
 /// Determine the current position of the device.
 ///
 /// When the location services are not enabled or permissions
 /// are denied the `Future` will return an error.
-Future<Position> determinePosition() async {
+Future<Position> _determinePosition() async {
   bool serviceEnabled;
   LocationPermission permission;
 
@@ -38,5 +60,6 @@ Future<Position> determinePosition() async {
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
-  return await Geolocator.getCurrentPosition();
+  return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.lowest);
 }
