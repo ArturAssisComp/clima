@@ -2,6 +2,7 @@ import 'package:clima/utilities/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/services/location.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -16,7 +17,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   void getLocationAndData() async {
     Location location = Location();
-    print('fila da puta');
     await location.getCurrentLocation();
     _longitude = location.longitude;
     _latitude = location.latitude;
@@ -34,10 +34,20 @@ class _LoadingScreenState extends State<LoadingScreen> {
       queryParameters,
     );
     http.Response response = await http.get(uri);
-    print('Antes, carai: $kWeatherAPIPath');
-    print('eeeeeeeeeeei $uri');
     if (response.statusCode == kHttpSuccessful) {
+      String data = response.body;
       print(response.body);
+      print(uri);
+      var jsonData = jsonDecode(data);
+      String currentTemperature =
+          '${jsonData['hourly']['temperature_2m'][TimeOfDay.now().hour]} ${jsonData['hourly_units']['temperature_2m']}';
+      String timezone = '${jsonData['timezone']}';
+      String weatherCode =
+          '${jsonData['hourly']['weathercode'][TimeOfDay.now().hour]}';
+      print('Temperature: $currentTemperature');
+      print('Timezone: $timezone');
+      print(
+          'Weather Condition: ${kWeatherCodeConditionDescription[weatherCode]}');
     } else {
       print(response.statusCode);
     }
