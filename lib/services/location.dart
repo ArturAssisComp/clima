@@ -16,9 +16,7 @@ class Location {
       position = await _determinePosition();
       _latitude = position.latitude;
       _longitude = position.longitude;
-    } catch (e) {
-      print(e);
-    }
+    } catch (_) {}
   }
 }
 
