@@ -1,6 +1,7 @@
 import 'package:clima/services/weather.dart';
 import 'package:flutter/material.dart';
 import 'package:clima/utilities/constants.dart';
+import 'package:clima/services/data.dart';
 
 class LocationScreen extends StatefulWidget {
   const LocationScreen({super.key, required Map<String, String> arguments})
@@ -17,8 +18,20 @@ class LocationScreen extends StatefulWidget {
 class _LocationScreenState extends State<LocationScreen> {
   final WeatherModel weatherModel = WeatherModel();
   Map<String, String> _data = {};
+  String _weatherText = '';
+  String _weatherIcon = '';
+  String _temperatureWithUnit = '';
 
-  void updateWeatherWithCurrentLocation() {}
+  Future<void> updateWeatherWithCurrentLocation() async {
+    Map<String, String> tmp =
+        await DataManager.getLocationAndDataByCurrentCoordinates();
+    if (tmp.isNotEmpty) {
+      setState(() {
+        _data = tmp;
+        _updateStateVariables();
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -26,13 +39,17 @@ class _LocationScreenState extends State<LocationScreen> {
     initDateFromLoadingPage();
   }
 
-  void initDateFromLoadingPage() {
-    _data = widget._initialArguments;
+  void _updateStateVariables() {
+    _weatherText =
+        '${weatherModel.getMessage(double.parse(_data['currentTemperature']!).toInt())} in ${_data['cityStateCountry']}';
+    _temperatureWithUnit =
+        '${_data['currentTemperature']} ${_data['temperatureUnit']} ';
+    _weatherIcon = weatherModel.getWeatherIcon(_data['weatherCode']!);
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void initDateFromLoadingPage() {
+    _data = widget._initialArguments;
+    _updateStateVariables();
   }
 
   @override
@@ -57,7 +74,9 @@ class _LocationScreenState extends State<LocationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      await updateWeatherWithCurrentLocation();
+                    },
                     child: const Icon(
                       Icons.near_me,
                       size: 50.0,
@@ -77,11 +96,11 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      '${_data['currentTemperature']} ${_data['temperatureUnit']} ',
+                      _temperatureWithUnit,
                       style: kTempTextStyle,
                     ),
                     Text(
-                      weatherModel.getWeatherIcon(_data['weatherCode']!),
+                      _weatherIcon,
                       style: kConditionTextStyle,
                     ),
                   ],
@@ -90,7 +109,7 @@ class _LocationScreenState extends State<LocationScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: Text(
-                  '${weatherModel.getMessage(double.parse(_data['currentTemperature']!).toInt())} in ${_data['cityStateCountry']}',
+                  _weatherText,
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),
