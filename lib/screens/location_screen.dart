@@ -3,16 +3,40 @@ import 'package:flutter/material.dart';
 import 'package:clima/utilities/constants.dart';
 
 class LocationScreen extends StatefulWidget {
+  const LocationScreen({super.key, required Map<String, String> arguments})
+      : _initialArguments = arguments;
+
+  final Map<String, String> _initialArguments;
+
+  static const String routeName = '/location-screen';
+
   @override
   State<LocationScreen> createState() => _LocationScreenState();
 }
 
 class _LocationScreenState extends State<LocationScreen> {
   final WeatherModel weatherModel = WeatherModel();
+  Map<String, String> _data = {};
+
+  void updateWeatherWithCurrentLocation() {}
+
+  @override
+  void initState() {
+    super.initState();
+    initDateFromLoadingPage();
+  }
+
+  void initDateFromLoadingPage() {
+    _data = widget._initialArguments;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Map<String, String> args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, String>;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -53,11 +77,11 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Row(
                   children: <Widget>[
                     Text(
-                      '${args['currentTemperature']} ${args['temperatureUnit']} ',
+                      '${_data['currentTemperature']} ${_data['temperatureUnit']} ',
                       style: kTempTextStyle,
                     ),
                     Text(
-                      weatherModel.getWeatherIcon(args['weatherCode']!),
+                      weatherModel.getWeatherIcon(_data['weatherCode']!),
                       style: kConditionTextStyle,
                     ),
                   ],
@@ -66,7 +90,7 @@ class _LocationScreenState extends State<LocationScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: Text(
-                  '${weatherModel.getMessage(double.parse(args['currentTemperature']!).toInt())} in ${args['cityStateCountry']}',
+                  '${weatherModel.getMessage(double.parse(_data['currentTemperature']!).toInt())} in ${_data['cityStateCountry']}',
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),

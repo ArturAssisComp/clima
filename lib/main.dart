@@ -10,10 +10,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      onGenerateRoute: (settings) {
+        // If you push the PassArguments route
+        if (settings.name == LocationScreen.routeName) {
+          // Cast the arguments to the correct
+          // type: ScreenArguments.
+          final args = settings.arguments as Map<String, String>;
+
+          // Then, extract the required data from
+          // the arguments and pass the data to the
+          // correct screen.
+          return MaterialPageRoute(
+            builder: (context) {
+              return LocationScreen(
+                arguments: args,
+              );
+            },
+          );
+        }
+        assert(false, 'Need to implement ${settings.name}');
+        return null;
+      },
       theme: ThemeData.dark(),
       routes: <String, Widget Function(BuildContext)>{
-        '/': (context) => const LoadingScreen(),
-        '/location-screen': (context) => LocationScreen(),
+        LoadingScreen.routName: (context) => const LoadingScreen(),
       },
     );
   }

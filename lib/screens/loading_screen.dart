@@ -4,6 +4,7 @@ import 'package:clima/services/data.dart';
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
+  static const routName = '/';
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
