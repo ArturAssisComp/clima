@@ -23,6 +23,17 @@ class _LocationScreenState extends State<LocationScreen> {
   String _weatherIcon = '';
   String _temperatureWithUnit = '';
 
+  Future<void> updateWeatherWithCityName({required String cityName}) async {
+    Map<String, String> tmp =
+        await DataManager.getLocationAndDataByCityName(cityName: cityName);
+    if (tmp.isNotEmpty) {
+      setState(() {
+        _data = tmp;
+        _updateStateVariables();
+      });
+    }
+  }
+
   Future<void> updateWeatherWithCurrentLocation() async {
     Map<String, String> tmp =
         await DataManager.getLocationAndDataByCurrentCoordinates();
@@ -84,8 +95,10 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, CityScreen.routeName);
+                    onPressed: () async {
+                      String cityName = await Navigator.pushNamed(
+                          context, CityScreen.routeName) as String;
+                      await updateWeatherWithCityName(cityName: cityName);
                     },
                     child: const Icon(
                       Icons.location_city,

@@ -12,8 +12,15 @@ import 'dart:convert';
 // build
 const String _kGeopafyAPIKey = String.fromEnvironment('GEOPAFY_API_KEY');
 const String _kGeopafyAPIAuthority = 'api.geoapify.com';
-const String _kGeopafyAPIPath = '/v1/geocode/reverse';
-const Map<String, String> _kGeopafyAPIQueryBasicParameters = {
+const String _kGeopafyAPIPathReverseGeocode = '/v1/geocode/reverse';
+const String _kGeopafyAPIPathGeocode = '/v1/geocode/search';
+const Map<String, String> _kGeopafyAPIGeocodeQueryBasicParameters = {
+  'format': 'json',
+  'type': 'city',
+  'apiKey': _kGeopafyAPIKey,
+};
+
+const Map<String, String> _kGeopafyAPIReverseGeocodeQueryBasicParameters = {
   'apiKey': _kGeopafyAPIKey,
 };
 
@@ -46,44 +53,75 @@ Future<Map<String, String>> getWeatherData(
   if (response.statusCode == kHttpSuccessful) {
     String data = response.body;
     var jsonData = jsonDecode(data);
-    String currentTemperature =
-        '${jsonData['hourly']['temperature_2m'][TimeOfDay.now().hour]}';
-    String temperatureUnit = '${jsonData['hourly_units']['temperature_2m']}';
-    String weatherCode =
-        '${jsonData['hourly']['weathercode'][TimeOfDay.now().hour]}';
-    return <String, String>{
-      'currentTemperature': currentTemperature,
-      'temperatureUnit': temperatureUnit,
-      'weatherCode': weatherCode,
-    };
-  } else {
-    return <String, String>{};
+    try {
+      String currentTemperature =
+          '${jsonData['hourly']['temperature_2m'][TimeOfDay.now().hour]}';
+      String temperatureUnit = '${jsonData['hourly_units']['temperature_2m']}';
+      String weatherCode =
+          '${jsonData['hourly']['weathercode'][TimeOfDay.now().hour]}';
+      return <String, String>{
+        'currentTemperature': currentTemperature,
+        'temperatureUnit': temperatureUnit,
+        'weatherCode': weatherCode,
+      };
+    } catch (_) {}
   }
+  return <String, String>{};
 }
 
-Future<Map<String, String>> getLocationData(
+Future<Map<String, String>> getCityFromCoordinatesData(
     {required double latitude, required double longitude}) async {
   Map<String, String> queryParameters = {
     'lat': latitude.toStringAsFixed(2),
     'lon': longitude.toStringAsFixed(2),
   };
-  queryParameters.addAll(_kGeopafyAPIQueryBasicParameters);
+  queryParameters.addAll(_kGeopafyAPIReverseGeocodeQueryBasicParameters);
 
   Uri uri = Uri.https(
     _kGeopafyAPIAuthority,
-    _kGeopafyAPIPath,
+    _kGeopafyAPIPathReverseGeocode,
     queryParameters,
   );
   http.Response response = await http.get(uri);
   if (response.statusCode == kHttpSuccessful) {
     String data = response.body;
     var jsonData = jsonDecode(data);
-    String cityStateCountry =
-        '${jsonData['features'][0]['properties']['city']}, ${jsonData['features'][0]['properties']['state']} (${jsonData['features'][0]['properties']['country']})';
-    return <String, String>{
-      'cityStateCountry': cityStateCountry,
-    };
-  } else {
-    return <String, String>{};
+    try {
+      String cityStateCountry =
+          '${jsonData['features'][0]['properties']['city']}, ${jsonData['features'][0]['properties']['state']} (${jsonData['features'][0]['properties']['country']})';
+      return <String, String>{
+        'cityStateCountry': cityStateCountry,
+      };
+    } catch (_) {}
   }
+  return <String, String>{};
+}
+
+Future<Map<String, String>> getCoordinatesFromCityData(
+    {required String cityName}) async {
+  Map<String, String> queryParameters = {
+    'city': cityName,
+  };
+  queryParameters.addAll(_kGeopafyAPIGeocodeQueryBasicParameters);
+
+  Uri uri = Uri.https(
+    _kGeopafyAPIAuthority,
+    _kGeopafyAPIPathGeocode,
+    queryParameters,
+  );
+  http.Response response = await http.get(uri);
+  if (response.statusCode == kHttpSuccessful) {
+    String data = response.body;
+    var jsonData = jsonDecode(data);
+
+    try {
+      String latitude = jsonData['results'][0]['lat'].toString();
+      String longitude = jsonData['results'][0]['lon'].toString();
+      return <String, String>{
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+    } catch (_) {}
+  }
+  return <String, String>{};
 }

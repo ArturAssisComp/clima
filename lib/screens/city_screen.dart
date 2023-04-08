@@ -51,7 +51,7 @@ class _CityScreenState extends State<CityScreen> {
               ),
               TextButton(
                 onPressed: () {
-                  print(_cityName);
+                  Navigator.pop(context, _cityName);
                 },
                 child: const Text(
                   'Get Weather',
