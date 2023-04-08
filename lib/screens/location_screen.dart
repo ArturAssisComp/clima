@@ -96,9 +96,11 @@ class _LocationScreenState extends State<LocationScreen> {
                   ),
                   TextButton(
                     onPressed: () async {
-                      String cityName = await Navigator.pushNamed(
-                          context, CityScreen.routeName) as String;
-                      await updateWeatherWithCityName(cityName: cityName);
+                      String? cityName = await Navigator.pushNamed(
+                          context, CityScreen.routeName) as String?;
+                      if (cityName != null) {
+                        await updateWeatherWithCityName(cityName: cityName);
+                      }
                     },
                     child: const Icon(
                       Icons.location_city,
